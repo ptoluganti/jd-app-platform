@@ -176,3 +176,4 @@ $RECYCLE.BIN/
 
 _NCrunch*
 platform/terraform/src/tfplan
+app/backend/go-service/.env
