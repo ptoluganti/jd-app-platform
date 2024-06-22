@@ -16,11 +16,11 @@ variable "prefix" {
 }
 
 
-variable "log_analytics_workspace_id" {
-  type        = string
-  description = "The Log Analytics Workspace ID"
+# variable "log_analytics_workspace_id" {
+#   type        = string
+#   description = "The Log Analytics Workspace ID"
   
-}
+# }
 
 variable "infrastructure_subnet_id" {
   type        = string

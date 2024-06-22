@@ -1,47 +1,60 @@
 
 data "azurerm_client_config" "current" {}
 
-resource "azurerm_log_analytics_workspace" "law" {
-  name                = "${var.prefix}-law-01"
-  location            = azurerm_resource_group.private.location
-  resource_group_name = azurerm_resource_group.private.name
-  sku                 = "PerGB2018"
-  retention_in_days   = 30
+resource "azurerm_public_ip" "bastion_pip" {
+  name                = "bastion_pip"
+  location            = azurerm_resource_group.mgt.location
+  resource_group_name = azurerm_resource_group.mgt.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
 }
-# resource "azurerm_public_ip" "apim_pop" {
-#   name                = "${var.prefix}-ip"
-#   resource_group_name = var.resource_group_name
-#   location            = var.location
-#   domain_name_label   = var.prefix
-#   allocation_method   = "Static"
-#   sku                 = "Standard"
-#   sku_tier            = "Regional"
-# }
 
-# Create public IPs
-# resource "azurerm_public_ip" "vm_pip" {
-#   name                = "${var.prefix}-vm-ip"
-#   location            = var.location
-#   resource_group_name = var.resource_group_name
-#   allocation_method   = "Dynamic"
-# }
+resource "azurerm_bastion_host" "bastion_host" {
+  name                = "${var.prefix}-bastion"
+  location            = azurerm_resource_group.mgt.location
+  resource_group_name = azurerm_resource_group.mgt.name
 
+  ip_configuration {
+    name                 = "configuration"
+    subnet_id            = module.network.snet_bastion
+    public_ip_address_id = azurerm_public_ip.bastion_pip.id
+  }
+}
+
+# resource "azurerm_log_analytics_workspace" "law" {
+#   name                = "${var.prefix}-law-01"
+#   location            = azurerm_resource_group.private.location
+#   resource_group_name = azurerm_resource_group.private.name
+#   sku                 = "PerGB2018"
+#   retention_in_days   = 30
+# }
 
 module "network" {
-  depends_on          = [azurerm_resource_group.network]
+  depends_on          = []
   source              = "./modules/network"
-  location            = var.location
+  location            = azurerm_resource_group.network.location
   resource_group_name = azurerm_resource_group.network.name
   prefix              = var.prefix
 }
 
+module "jumpbox" {
+  count = 0
+  depends_on          = []
+  source              = "./modules/windows_vm"
+  location            = azurerm_resource_group.mgt.location
+  resource_group_name = azurerm_resource_group.mgt.name
+  prefix              = var.prefix
+  subnet_id           = module.network.snet_backend
+}
+
 module "ace" {
-  depends_on                 = [azurerm_resource_group.private]
+  count = 1
+  depends_on                 = []
   source                     = "./modules/ace"
   location                   = var.location
   resource_group_name        = azurerm_resource_group.private.name
   prefix                     = var.prefix
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.law.id
+  # log_analytics_workspace_id = azurerm_log_analytics_workspace.law.id
   infrastructure_subnet_id   = module.network.snet_backend
   workload_profiles = {
     app_backend = {

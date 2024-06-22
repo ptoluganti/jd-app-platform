@@ -6,17 +6,17 @@ resource "azurerm_network_interface" "vm_nic" {
 
   ip_configuration {
     name                          = "vm_nic_configuration"
-    subnet_id                     = azurerm_subnet.ingress.id
+    subnet_id                     = var.subnet_id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.vm_public_ip.id
+    # public_ip_address_id          = azurerm_public_ip.vm_public_ip.id
   }
 }
 
 # Connect the security group to the network interface
-resource "azurerm_network_interface_security_group_association" "vm_nic_association" {
-  network_interface_id      = azurerm_network_interface.vm_nic.id
-  network_security_group_id = azurerm_network_security_group.vm_nsg.id
-}
+# resource "azurerm_network_interface_security_group_association" "vm_nic_association" {
+#   network_interface_id      = azurerm_network_interface.vm_nic.id
+#   network_security_group_id = azurerm_network_security_group.vm_nsg.id
+# }
 
 # Create virtual machine
 resource "azurerm_windows_virtual_machine" "main" {

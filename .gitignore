@@ -175,3 +175,4 @@ $RECYCLE.BIN/
 .DS_Store
 
 _NCrunch*
+platform/terraform/src/tfplan

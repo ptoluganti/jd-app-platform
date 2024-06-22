@@ -11,10 +11,10 @@ resource "azurerm_resource_group" "network" {
 #   location = var.location
 # }
 
-# resource "azurerm_resource_group" "public" {
-#   name     = "${var.prefix}-public-rg"
-#   location = var.location
-# }
+resource "azurerm_resource_group" "mgt" {
+  name     = "${var.prefix}-mgt-rg"
+  location = var.location
+}
 
 resource "azurerm_resource_group" "private" {
   name     = "${var.prefix}-private-rg"
