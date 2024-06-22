@@ -38,25 +38,26 @@ module "network" {
 }
 
 module "jumpbox" {
-  count = 0
+  count               = 1
   depends_on          = []
   source              = "./modules/windows_vm"
   location            = azurerm_resource_group.mgt.location
   resource_group_name = azurerm_resource_group.mgt.name
   prefix              = var.prefix
-  subnet_id           = module.network.snet_backend
+  subnet_id           = module.network.snet_mgt
 }
 
 module "ace" {
-  count = 1
-  depends_on                 = []
-  source                     = "./modules/ace"
-  location                   = var.location
-  resource_group_name        = azurerm_resource_group.private.name
-  prefix                     = var.prefix
+  count               = 1
+  depends_on          = []
+  source              = "./modules/ace"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.private.name
+  prefix              = var.prefix
+  internal_load_balancer_enabled = true
   # log_analytics_workspace_id = azurerm_log_analytics_workspace.law.id
-  infrastructure_subnet_id   = module.network.snet_backend
-  workload_profiles = {
+  infrastructure_subnet_id = module.network.snet_backend
+  workload_profile = {
     app_backend = {
       name                  = "app-backend"
       workload_profile_type = "D4"

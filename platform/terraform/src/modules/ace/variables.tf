@@ -6,7 +6,7 @@ variable "location" {
 
 variable "resource_group_name" {
   type        = string
-  
+  description = "The Resource Group Name"
 }
 
 variable "prefix" {
@@ -15,20 +15,38 @@ variable "prefix" {
   description = "The prefix of the resources"
 }
 
+variable "internal_load_balancer_enabled" {
+  type        = bool
+  description = "Enable Internal Load Balancer"
+  default     = false
+}
 
-# variable "log_analytics_workspace_id" {
-#   type        = string
-#   description = "The Log Analytics Workspace ID"
-  
-# }
+
+variable "zone_redundancy_enabled" {
+  type        = bool
+  description = "Enable Zone Redundancy"
+  default     = false
+}
+
+variable "infrastructure_resource_group_name" {
+  type        = string
+  description = "The Infrastructure Resource Group Name"
+  default     = null
+
+}
+variable "log_analytics_workspace_id" {
+  type        = string
+  description = "The Log Analytics Workspace ID"
+  default     = null
+}
 
 variable "infrastructure_subnet_id" {
   type        = string
   description = "The Infrastructure Subnet ID"
-  
+
 }
 
-variable "workload_profiles" {
+variable "workload_profile" {
   type = map(object({
     name                  = string
     workload_profile_type = string
