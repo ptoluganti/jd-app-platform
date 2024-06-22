@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  go-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8050"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    # environment:
+    #   - PORT=8080
+    # depends_on:
+    #   - db
+    # networks:
+    #   - go-service-network
+  # db:
+  #   image: mysql:5.7
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: root
+  #     MYSQL_DATABASE: go_service
+  #     MYSQL_USER: go_service
+  #     MYSQL_PASSWORD: go_service
+  #   ports:
+  #     - "3306:3306"
+  #   networks:
+  #     - go-service-network

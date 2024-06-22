@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  go-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8050"
+    # volumes:
+    #   - .:/app
+    # env_file:
+    #   - .env
