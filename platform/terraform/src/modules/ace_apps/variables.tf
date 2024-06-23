@@ -14,38 +14,24 @@ variable "revision_mode" {
   default     = "Single"
 }
 
+
+variable "ingress" {
+  type = any
+  description = "The Ingress"
+  
+}
+
 variable "init_container" {
   type = object({
     name = string
     image = string
   })
   description = "Whether to use an init container"
+  default     = null
 }
 
 variable "containers" {
-  type = list(
-    object({
-      name = string
-      image = string
-      cpu_request    = string
-      memory_request = string
-      cpu_limit    = string
-      memory_limit = string
-      ports = list(
-        object({
-          port     = number
-          protocol = string
-        })
-      )
-      env = map(string)
-      volume_mounts = list(
-        object({
-          name       = string
-          mount_path = string
-        })
-      )
-    })
-  )
+  type =any
   description = "The Containers"
 
 }

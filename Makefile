@@ -1,18 +1,19 @@
 # ==================== Variables ====================
 
-csharp_source = ./app/backend/csharp-service
-go_source = ./app/backend/go-service
-tf_source = ./platform/terraform/src
+CSHARP_SOURCE = ./app/backend/csharp-service
+GO_SOURCE = ./app/backend/go-service
+TF_SOURCE = ./platform/terraform/src
+TF_TOOL='tofu'
 
 # ==================== csharp ====================
 
 .PHONY: run-csharp-svc
 run-csharp-svc:
-	docker compose -f $(csharp_source)/docker-compose.yml up --build 
+	docker compose -f $(CSHARP_SOURCE)/docker-compose.yml up --build 
 
 .PHONY: build-csharp-svc
 build-csharp-svc:
-	docker build -t ptoluganti/csharp-service -f $(csharp_source)/Dockerfile $(csharp_source)
+	docker build -t ptoluganti/csharp-service -f $(CSHARP_SOURCE)/Dockerfile $(CSHARP_SOURCE)
 
 .PHONY: push-csharp-svc
 push-csharp-svc: build-csharp-svc
@@ -22,10 +23,10 @@ push-csharp-svc: build-csharp-svc
 
 .PHONY: run-go-svc
 run-go-svc:
-	docker compose -f $(go_source)/docker-compose.yml up --build 
+	docker compose -f $(GO_SOURCE)/docker-compose.yml up --build 
 .PHONY: build-go-svc
 build-go-svc:
-	docker build -t ptoluganti/go-service -f $(go_source)/Dockerfile $(go_source)
+	docker build -t ptoluganti/go-service -f $(GO_SOURCE)/Dockerfile $(GO_SOURCE)
 
 .PHONY: push-go-svc
 push-go-svc: build-go-svc
@@ -33,22 +34,36 @@ push-go-svc: build-go-svc
 
 # ==================== Terraform ====================
 
-.PHONY: tfvalidate
-tfvalidate:
-	tofu -chdir=$(tf_source) validate 
+# Validate the Terraform configuration
+.PHONY: validate
+validate:
+	$(TF_TOOL) -chdir=$(TF_SOURCE) validate 
 
-.PHONY: tfinit
-tfinit: tfvalidate
-	tofu -chdir=$(tf_source) init -input=false -upgrade -reconfigure
+# Initialize the Terraform configuration
+.PHONY: init
+init:
+	$(TF_TOOL) -chdir=$(TF_SOURCE) init -input=false -upgrade -reconfigure
 
-.PHONY: tfplan
-tfplan: tfinit
-	tofu -chdir=$(tf_source) plan -out=./tfplan
+# Generate and show an execution plan
+.PHONY: plan
+plan:
+	$(TF_TOOL) -chdir=$(TF_SOURCE) plan -out=plan.tfplan
 
-.PHONY: tfapply
-tfapply: tfplan
-	tofu -chdir=$(tf_source) apply "./tfplan"
+# Apply the changes required to reach the desired state
+.PHONY: apply
+apply:
+	$(TF_TOOL) -chdir=$(TF_SOURCE) apply plan.tfplan
 
-.PHONY: tfclean
-tfclean: 
-	tofu -chdir=$(tf_source) destroy --auto-approve
+# Destroy the Terraform-managed infrastructure
+.PHONY: destroy
+destroy:
+	$(TF_TOOL) -chdir=$(TF_SOURCE) destroy --auto-approve
+
+# Clean up generated files
+.PHONY: clean
+clean:
+	rm -f plan.tfplan
+
+# Run all steps
+.PHONY: run
+run: init validate plan apply

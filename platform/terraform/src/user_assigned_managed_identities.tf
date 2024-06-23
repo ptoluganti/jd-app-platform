@@ -28,8 +28,8 @@
 #   resource_group_name = azurerm_resource_group.public.name
 # }
 
-# resource "azurerm_user_assigned_identity" "private" {
-#   location            = var.location
-#   name                = "${var.prefix}-private"
-#   resource_group_name = azurerm_resource_group.private.name
-# }
+resource "azurerm_user_assigned_identity" "ace_app" {
+  location            = azurerm_resource_group.private.location
+  name                = "${var.prefix}-ace-app"
+  resource_group_name = azurerm_resource_group.private.name
+}

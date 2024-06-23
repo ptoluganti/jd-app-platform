@@ -1,15 +1,18 @@
 
 resource "azurerm_container_app" "ca" {
   name                         = var.name
-  container_app_environment_id = azurerm_container_app_environment.cae.id
+  container_app_environment_id = var.container_app_environment_id
   resource_group_name          = var.resource_group_name
   revision_mode                = try(var.revision_mode, "Single")
   workload_profile_name        = try(var.workload_profile_name, "Consumption")
 
   template {
-    min_replicas    = try(var.template.min_replicas, 1)
-    max_replicas    = try(var.template.max_replicas, 1)
-    revision_suffix = try(var.template.revision_suffix, null)
+    min_replicas    = 1
+    # try(var.template.min_replicas, 1)
+    max_replicas    = 1
+    # try(var.template.max_replicas, 1)
+    revision_suffix = null
+    # try(var.template.revision_suffix, null)
 
     dynamic "init_container" {
       for_each = try(var.init_container, null) != null ? { default = var.init_container } : {}
@@ -47,173 +50,15 @@ resource "azurerm_container_app" "ca" {
         image   = container.value.image
         cpu     = try(container.value.cpu, 0.25)
         memory  = try(container.value.memory, "0.5Gi")
-        command = try(container.value.command, null)
-        args    = try(container.value.args, null)
-
-        dynamic "env" {
-          for_each = { for key, env in try(container.value.env, {}) : key => env }
-          content {
-            name        = env.key
-            value       = try(env.value.value, null)
-            secret_name = try(env.value.secret_name, null)
-          }
-        }
-
-        dynamic "volume_mounts" {
-          for_each = try(container.value.volume_mounts, null) != null ? { default = container.value.volume_mounts } : {}
-          content {
-            name = volume_mounts.value.name
-            path = volume_mounts.value.path
-          }
-        }
-
-        dynamic "liveness_probe" {
-          for_each = try(container.value.liveness_probe, null) != null ? { default = container.value.liveness_probe } : {}
-          content {
-            transport                        = try(liveness_probe.value.transport, "HTTPS")
-            port                             = liveness_probe.value.port
-            host                             = try(liveness_probe.value.host, null)
-            failure_count_threshold          = try(liveness_probe.value.failure_count_threshold, 3)
-            initial_delay                    = try(liveness_probe.value.initial_delay, 30)
-            interval_seconds                 = try(liveness_probe.value.interval_seconds, 10)
-            path                             = try(liveness_probe.value.path, "/")
-            timeout                          = try(liveness_probe.value.timeout, 1)
-            termination_grace_period_seconds = try(liveness_probe.value.termination_grace_period_seconds, null)
-
-            dynamic "header" {
-              for_each = try(liveness_probe.value.header, null) != null ? [1] : []
-              content {
-                name  = liveness_probe.value.header.name
-                value = liveness_probe.value.header.value
-              }
-            }
-          }
-        }
-
-        dynamic "readiness_probe" {
-          for_each = try(container.value.readiness_probe, null) != null ? { default = container.value.readiness_probe } : {}
-          content {
-            transport               = try(readiness_probe.value.transport, "HTTPS")
-            port                    = readiness_probe.value.port
-            host                    = try(readiness_probe.value.host, null)
-            failure_count_threshold = try(readiness_probe.value.failure_count_threshold, 3)
-            success_count_threshold = try(readiness_probe.value.termination_grace_period_seconds, 3)
-            interval_seconds        = try(readiness_probe.value.interval_seconds, 10)
-            path                    = try(readiness_probe.value.path, "/")
-            timeout                 = try(readiness_probe.value.timeout, 1)
-
-            dynamic "header" {
-              for_each = try(readiness_probe.value.header, null) != null ? [1] : []
-              content {
-                name  = readiness_probe.value.header.name
-                value = readiness_probe.value.header.value
-              }
-            }
-          }
-        }
-
-        dynamic "startup_probe" {
-          for_each = try(container.value.startup_probe, null) != null ? { default = container.value.startup_probe } : {}
-          content {
-            transport                        = try(startup_probe.value.transport, "HTTPS")
-            port                             = startup_probe.value.port
-            host                             = try(startup_probe.value.host, null)
-            failure_count_threshold          = try(startup_probe.value.failure_count_threshold, 3)
-            interval_seconds                 = try(startup_probe.value.interval_seconds, 10)
-            path                             = try(startup_probe.value.path, "/")
-            timeout                          = try(startup_probe.value.timeout, 1)
-            termination_grace_period_seconds = try(startup_probe.value.termination_grace_period_seconds, null)
-
-            dynamic "header" {
-              for_each = try(startup_probe.value.header, null) != null ? [1] : []
-              content {
-                name  = startup_probe.value.header.name
-                value = startup_probe.value.header.value
-              }
-            }
-          }
-        }
+        
       }
     }
 
-    dynamic "azure_queue_scale_rule" {
-      for_each = try(each.value.template.azure_queue_scale_rule, null) != null ? { default = each.value.template.azure_queue_scale_rule } : {}
-      content {
-        name         = azure_queue_scale_rule.value.name
-        queue_name   = azure_queue_scale_rule.value.queue_name
-        queue_length = azure_queue_scale_rule.value.queue_length
-
-        dynamic "authentication" {
-          for_each = try(azure_queue_scale_rule.value.template.authentication, null) != null ? { default = azure_queue_scale_rule.value.template.authentication } : {}
-          content {
-            secret_name       = azure_queue_scale_rule.value.authentication.secret_name
-            trigger_parameter = azure_queue_scale_rule.value.authentication.trigger_parameter
-          }
-        }
-      }
-    }
-
-    dynamic "custom_scale_rule" {
-      for_each = try(each.value.template.custom_scale_rule, null) != null ? { default = each.value.template.custom_scale_rule } : {}
-      content {
-        name             = custom_scale_rule.value.name
-        custom_rule_type = custom_scale_rule.value.custom_rule_type
-        metadata         = custom_scale_rule.value.metadata
-
-        dynamic "authentication" {
-          for_each = try(custom_scale_rule.value.template.authentication, null) != null ? { default = custom_scale_rule.value.template.authentication } : {}
-          content {
-            secret_name       = authentication.value.secret_name
-            trigger_parameter = authentication.value.trigger_parameter
-          }
-        }
-      }
-    }
-
-    dynamic "http_scale_rule" {
-      for_each = try(each.value.template.http_scale_rule, null) != null ? { default = each.value.template.http_scale_rule } : {}
-      content {
-        name                = http_scale_rule.value.name
-        concurrent_requests = http_scale_rule.value.concurrent_requests
-
-        dynamic "authentication" {
-          for_each = try(http_scale_rule.value.template.authentication, null) != null ? { default = http_scale_rule.value.template.authentication } : {}
-          content {
-            secret_name       = authentication.value.secret_name
-            trigger_parameter = authentication.value.trigger_parameter
-          }
-        }
-      }
-    }
-
-    dynamic "tcp_scale_rule" {
-      for_each = try(each.value.template.tcp_scale_rule, null) != null ? { default = each.value.template.tcp_scale_rule } : {}
-      content {
-        name                = tcp_scale_rule.value.name
-        concurrent_requests = tcp_scale_rule.value.concurrent_requests
-
-        dynamic "authentication" {
-          for_each = try(tcp_scale_rule.value.template.authentication, null) != null ? { default = tcp_scale_rule.value.template.authentication } : {}
-          content {
-            secret_name       = authentication.value.secret_name
-            trigger_parameter = authentication.value.trigger_parameter
-          }
-        }
-      }
-    }
-
-    dynamic "volume" {
-      for_each = try(each.value.volume, null) != null ? { default = each.value.volume } : {}
-      content {
-        name         = volume.value.name
-        storage_name = try(volume.value.storage_name, null)
-        storage_type = try(volume.value.storage_type, null)
-      }
-    }
+    
   }
 
   dynamic "ingress" {
-    for_each = try(each.value.ingress, null) != null ? { default = each.value.ingress } : {}
+    for_each = try(var.ingress, null) != null ? { default = var.ingress } : {}
 
     content {
       allow_insecure_connections = try(ingress.value.allow_insecure_connections, false)
