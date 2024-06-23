@@ -48,12 +48,12 @@ module "jumpbox" {
 }
 
 module "ace" {
-  count               = 1
-  depends_on          = []
-  source              = "./modules/ace"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.private.name
-  prefix              = var.prefix
+  count                          = 1
+  depends_on                     = []
+  source                         = "./modules/ace"
+  location                       = var.location
+  resource_group_name            = azurerm_resource_group.private.name
+  prefix                         = var.prefix
   internal_load_balancer_enabled = true
   # log_analytics_workspace_id = azurerm_log_analytics_workspace.law.id
   infrastructure_subnet_id = module.network.snet_backend
@@ -63,6 +63,51 @@ module "ace" {
       workload_profile_type = "D4"
       maximum_count         = 2
       minimum_count         = 1
+    }
+  }
+}
+
+resource "azurerm_private_dns_zone" "ace_dnszone" {
+  name                = module.ace[0].ace_default_domain
+  resource_group_name = azurerm_resource_group.private.name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "ace_network_link" {
+  resource_group_name   = azurerm_resource_group.private.name
+  name                  = "${var.prefix}-link"
+  private_dns_zone_name = azurerm_private_dns_zone.ace_dnszone.name
+  virtual_network_id    = module.network.vnet
+  registration_enabled  = true
+}
+
+resource "azurerm_private_dns_a_record" "ace_dns_a_record" {
+  name                = "*"
+  zone_name           = azurerm_private_dns_zone.ace_dnszone.name
+  resource_group_name = azurerm_resource_group.private.name
+  ttl                 = 300
+  records             = [module.ace[0].ace_static_ip]
+}
+
+module "ace_app" {
+  count                        = 1
+  source                       = "./modules/ace_apps"
+  container_app_environment_id = module.ace[0].ace_id
+  resource_group_name          = azurerm_resource_group.private.name
+  workload_profile_name        = "app-backend"
+  name                         = "go-serice"
+  ingress                      = null
+  app_identities = {
+    app-backend = {
+      identity_ids = []
+      type         = "SystemAssigned"
+    }
+  }
+  containers = {
+    go-service = {
+      image                  = "mcr.microsoft.com/dotnet/samples:aspnetapp"
+      cpu                    = "0.5"
+      memory                 = "1Gi"
+      azure_queue_scale_rule = null
     }
   }
 }
