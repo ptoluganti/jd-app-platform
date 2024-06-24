@@ -1,4 +1,4 @@
-output "ace_app" {
-  sensitive = true
-  value = module.ace_app
-}
+# output "go_service_app_password" {
+#   sensitive = true
+#   value = azuread_application_password.go_serice.password
+# }
