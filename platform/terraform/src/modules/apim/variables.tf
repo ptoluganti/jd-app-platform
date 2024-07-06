@@ -4,37 +4,33 @@ variable "location" {
   description = "The location of the resources"
 }
 
-variable "prefix" {
+variable "resource_group_name" {
   type        = string
-  default     = "apim-demo-01"
-  description = "The prefix of the resources"
+  description = "The Resource Group Name"
 }
 
-variable "root_dns_name" {
+variable "prefix" {
   type        = string
-  default     = "apim-demo-01.com"
-  description = "The root domain name to be used for exposing the APIM site."
+  default     = "apim-mi-demo-01"
+  description = "The prefix of the resources"
 }
 
 variable "contact_name" {
   description = "Full name of the contact person for APIM and SSL certifiate."
   type        = string
-  default     = "Pradeep Toluganti"
 }
 
 variable "contact_email" {
   description = "Email address for APIM and SSL renewal notifications."
   type        = string
-  default     = "pradeep.toluganti@hotmail.com"
 }
 
 variable "contact_phone" {
   description = "Phone number for APIM and SSL renewal notifications."
   type        = string
-  default     = "07944266584"
 }
 
-variable "az_sp_app_secret" {
-  description = "The secret of the Service Principal used for the Azure DNS challenge."
+variable "subnet_id" {
   type        = string
+  description = "The subnet ID for the APIM"
 }

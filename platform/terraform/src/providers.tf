@@ -10,15 +10,15 @@ terraform {
       version = "~> 3"
     }
 
-    acme = {
-      source  = "vancluever/acme"
-      version = "~> 2"
-    }
+    # acme = {
+    #   source  = "vancluever/acme"
+    #   version = "~> 2"
+    # }
 
-    tls = {
-      source  = "hashicorp/tls"
-      version = "~> 3"
-    }
+    # tls = {
+    #   source  = "hashicorp/tls"
+    #   version = "~> 3"
+    # }
 
     azuread = {
       source  = "hashicorp/azuread"
@@ -40,10 +40,10 @@ provider "azurerm" {
   }
 }
 
-provider "acme" {
-  server_url = "https://acme-v02.api.letsencrypt.org/directory"
-}
+# provider "acme" {
+#   server_url = "https://acme-staging-v02.api.letsencrypt.org/directory"
+# }
 
-provider "tls" {
+# provider "tls" {
 
-}
+# }

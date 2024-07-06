@@ -54,3 +54,12 @@ variable "workload_profile" {
     minimum_count         = number
   }))
 }
+
+variable "certificates" {
+  type = map(object({
+    friendly_name  = string
+    key_vault_id   = string
+    secret_name    = string
+    # secret_version = string
+  }))
+}

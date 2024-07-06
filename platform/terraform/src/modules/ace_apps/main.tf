@@ -7,9 +7,9 @@ resource "azurerm_container_app" "ca" {
   workload_profile_name        = try(var.workload_profile_name, "Consumption")
 
   template {
-    min_replicas    = 1
+    min_replicas = 1
     # try(var.template.min_replicas, 1)
-    max_replicas    = 1
+    max_replicas = 1
     # try(var.template.max_replicas, 1)
     revision_suffix = null
     # try(var.template.revision_suffix, null)
@@ -46,15 +46,15 @@ resource "azurerm_container_app" "ca" {
     dynamic "container" {
       for_each = var.containers
       content {
-        name    = container.key
-        image   = container.value.image
-        cpu     = try(container.value.cpu, 0.25)
-        memory  = try(container.value.memory, "0.5Gi")
-        
+        name   = container.key
+        image  = container.value.image
+        cpu    = try(container.value.cpu, 0.25)
+        memory = try(container.value.memory, "0.5Gi")
+
       }
     }
 
-    
+
   }
 
   dynamic "ingress" {
@@ -90,14 +90,16 @@ resource "azurerm_container_app" "ca" {
           ip_address_range = ip_security_restriction.value.ip_address_range
         }
       }
+
+
     }
   }
 
   dynamic "registry" {
-    for_each = try(var.registry_identities, {})
+    for_each = try(var.registry_identities, null)
     content {
-      server               = registry.value.server
-      identity             = try(registry.value.identity_id, null)
+      server = registry.value.server
+      # identity             = try(registry.value.identity, null)
       username             = try(registry.value.username, null)
       password_secret_name = try(registry.value.password_secret_name, null)
     }
@@ -110,6 +112,11 @@ resource "azurerm_container_app" "ca" {
       type         = try(identity.value.type, "SystemAssigned")
       identity_ids = try(identity.value.identity_ids, [])
     }
+  }
+
+  secret {
+    name  = "docker-io-pass"
+    value = "password1234"
   }
 
   tags = var.tags

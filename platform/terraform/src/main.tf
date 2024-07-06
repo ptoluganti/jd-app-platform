@@ -1,6 +1,12 @@
 
 data "azurerm_client_config" "current" {}
 
+resource "azurerm_private_dns_zone" "private_dns_zones" {
+  for_each            = local.private_dns_zones
+  name                = each.value
+  resource_group_name = azurerm_resource_group.network.name
+}
+
 resource "azurerm_public_ip" "bastion_pip" {
   name                = "bastion_pip"
   location            = azurerm_resource_group.mgt.location
@@ -37,6 +43,15 @@ module "network" {
   prefix              = var.prefix
 }
 
+
+resource "azurerm_private_dns_zone_virtual_network_link" "private_dns_network_links" {
+  for_each              = local.private_dns_zones
+  name                  = "${module.network.vnet.name}-link"
+  resource_group_name   = azurerm_resource_group.network.name
+  private_dns_zone_name = each.value
+  virtual_network_id    = module.network.vnet.id
+}
+
 module "jumpbox" {
   count               = 1
   depends_on          = []
@@ -47,9 +62,25 @@ module "jumpbox" {
   subnet_id           = module.network.snet_mgt
 }
 
+module "keyvault" {
+  source              = "./modules/keyvault"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.private.name
+  prefix              = var.prefix
+  subnet_id           = module.network.snet_backend
+  private_dns_zone_id = azurerm_private_dns_zone.private_dns_zones["privatelink-vaultcore-azure-net"].id
+}
+
+# module "apim" {
+#   source              = "./modules/apim"
+#   location            = var.location
+#   resource_group_name = azurerm_resource_group.apim.name
+#   prefix              = var.prefix
+#   subnet_id           = module.network.snet_apim
+# }
+
 module "ace" {
   count                          = 1
-  depends_on                     = []
   source                         = "./modules/ace"
   location                       = var.location
   resource_group_name            = azurerm_resource_group.private.name
@@ -65,6 +96,20 @@ module "ace" {
       minimum_count         = 1
     }
   }
+  certificates = {
+    ace_cert = {
+      friendly_name  = "ace-self-signed-cert"
+      key_vault_id   = module.keyvault.keyvault.id
+      secret_name    = azurerm_key_vault_certificate.cert.name
+      # secret_version = azurerm_key_vault_certificate.cert.certificate
+    }
+  }
+
+  depends_on = [
+    module.keyvault,
+    module.network,
+    azurerm_key_vault_certificate.cert
+  ]
 }
 
 resource "azurerm_private_dns_zone" "ace_dnszone" {
@@ -76,7 +121,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "ace_network_link" {
   resource_group_name   = azurerm_resource_group.private.name
   name                  = "${var.prefix}-link"
   private_dns_zone_name = azurerm_private_dns_zone.ace_dnszone.name
-  virtual_network_id    = module.network.vnet
+  virtual_network_id    = module.network.vnet.id
   registration_enabled  = true
 }
 

@@ -19,5 +19,8 @@ output "snet_frontend" {
 }
 
 output "vnet" {
-  value = azurerm_virtual_network.vnet.id
+  value = {
+    id   = azurerm_virtual_network.vnet.id
+    name = azurerm_virtual_network.vnet.name
+  }
 }

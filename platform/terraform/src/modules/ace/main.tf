@@ -7,6 +7,7 @@ resource "azurerm_container_app_environment" "ace" {
   internal_load_balancer_enabled     = try(var.internal_load_balancer_enabled, null)
   zone_redundancy_enabled            = try(var.zone_redundancy_enabled, null)
   log_analytics_workspace_id         = try(var.log_analytics_workspace_id, null)
+
   dynamic "workload_profile" {
     for_each = try(var.workload_profile, {})
     content {
@@ -15,5 +16,23 @@ resource "azurerm_container_app_environment" "ace" {
       maximum_count         = workload_profile.value.maximum_count
       minimum_count         = workload_profile.value.minimum_count
     }
+  }
+}
+
+data "azurerm_key_vault_secret" "secret" {
+  for_each     = var.certificates
+  name         = each.value.secret_name
+  key_vault_id = each.value.key_vault_id
+  # version      = each.value.secret_version
+}
+
+resource "azurerm_container_app_environment_certificate" "cert" {
+  for_each                     = var.certificates
+  name                         = each.value.friendly_name
+  container_app_environment_id = azurerm_container_app_environment.ace.id
+  certificate_blob_base64      = data.azurerm_key_vault_secret.secret[each.key].value
+  certificate_password         = ""
+  lifecycle {
+    ignore_changes = [tags]
   }
 }

@@ -6,10 +6,10 @@ resource "azurerm_resource_group" "network" {
   location = var.location
 }
 
-# resource "azurerm_resource_group" "apim" {
-#   name     = "${var.prefix}-apim-rg"
-#   location = var.location
-# }
+resource "azurerm_resource_group" "apim" {
+  name     = "${var.prefix}-apim-rg"
+  location = var.location
+}
 
 resource "azurerm_resource_group" "mgt" {
   name     = "${var.prefix}-mgt-rg"

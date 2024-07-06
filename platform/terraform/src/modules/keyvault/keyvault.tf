@@ -1,17 +1,38 @@
-# resource "azurerm_key_vault" "kv" {
-#   name                = "${var.prefix}-kv"
-#   resource_group_name = azurerm_resource_group.private.name
-#   location            = azurerm_resource_group.private.location
-#   tenant_id = data.azurerm_client_config.current.tenant_id
-#   sku_name  = "standard"
-#   enabled_for_deployment = true
-#   enabled_for_disk_encryption = true
-#   enabled_for_template_deployment = true
-#   enable_rbac_authorization = true
+data "azurerm_client_config" "current" {
+}
+
+resource "azurerm_key_vault" "main" {
+  name                            = "${var.prefix}-kv"
+  resource_group_name             = var.resource_group_name
+  location                        = var.location
+  tenant_id                       = data.azurerm_client_config.current.tenant_id
+  sku_name                        = "standard"
+  enabled_for_deployment          = true
+  enabled_for_disk_encryption     = true
+  enabled_for_template_deployment = true
+  enable_rbac_authorization       = true
+}
+
+# resource "azurerm_private_endpoint" "main" {
+#   name                = "${azurerm_key_vault.main.name}-pe"
+#   resource_group_name = azurerm_key_vault.main.resource_group_name
+#   location            = azurerm_key_vault.main.location
+#   subnet_id           = var.subnet_id
+#   private_dns_zone_group {
+#     name                 = "default"
+#     private_dns_zone_ids = [var.private_dns_zone_id]
+#   }
+#   private_service_connection {
+#     is_manual_connection           = false
+#     private_connection_resource_id = azurerm_key_vault.main.id
+#     name                           = "${azurerm_key_vault.main.name}-psc"
+#     subresource_names              = ["vault"]
+#   }
+#   depends_on = [azurerm_key_vault.main]
 # }
 
-# resource "azurerm_role_assignment" "this" {
-#   scope                = azurerm_key_vault.kv.id
+# resource "azurerm_role_assignment" "terraform_spn" {
+#   scope                = azurerm_key_vault.main.id
 #   role_definition_name = "Key Vault Administrator"
 #   principal_id         = data.azurerm_client_config.current.object_id
 # }

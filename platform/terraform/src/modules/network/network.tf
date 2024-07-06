@@ -25,7 +25,7 @@ resource "azurerm_subnet" "apps_backend" {
   name                 = "apps-backend-subnet"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.4.0/23"]
+  address_prefixes     = ["10.0.4.0/27"]
   delegation {
     name = "core-backend-appsenv"
     service_delegation {

@@ -1,9 +1,9 @@
 # https://techcommunity.microsoft.com/t5/fasttrack-for-azure/azure-api-management-stv1-to-stv2-migration-using-terraform/ba-p/4086940
 
 resource "azurerm_api_management" "apim" {
-  name                 = "${var.prefix}"
-  resource_group_name  = azurerm_resource_group.apim.name
-  location             = azurerm_resource_group.apim.location
+  name                 = var.prefix
+  resource_group_name  = var.resource_group_name
+  location             = var.location
   publisher_name       = var.contact_name
   publisher_email      = var.contact_email
   sku_name             = "Developer_1"
@@ -23,10 +23,10 @@ resource "azurerm_api_management" "apim" {
   # public_ip_address_id = azurerm_public_ip.ip.id
 
   virtual_network_configuration {
-    subnet_id = azurerm_subnet.apim.id
+    subnet_id = var.subnet_id
   }
 
-  tags = { }
+  tags = {}
 }
 
 # resource "azurerm_api_management_custom_domain" "apimdomain" {

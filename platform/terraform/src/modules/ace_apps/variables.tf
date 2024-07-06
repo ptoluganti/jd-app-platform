@@ -16,14 +16,14 @@ variable "revision_mode" {
 
 
 variable "ingress" {
-  type = any
+  type        = any
   description = "The Ingress"
-  
+
 }
 
 variable "init_container" {
   type = object({
-    name = string
+    name  = string
     image = string
   })
   description = "Whether to use an init container"
@@ -31,7 +31,7 @@ variable "init_container" {
 }
 
 variable "containers" {
-  type =any
+  type        = any
   description = "The Containers"
 
 }
