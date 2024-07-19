@@ -178,3 +178,6 @@ _NCrunch*
 platform/terraform/src/tfplan
 app/backend/go-service/.env
 platform/terraform/src/plan.tfplan
+app/backend/python-service/app/__pycache__/**
+app/backend/python-service/venv/**
+platform/terraform/src/.terraform.lock.hcl

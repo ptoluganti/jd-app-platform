@@ -5,6 +5,7 @@ GO_SOURCE = ./app/backend/go-service
 TF_SOURCE = ./platform/terraform/src
 TF_TOOL='tofu'
 
+
 # ==================== csharp ====================
 
 .PHONY: run-csharp-svc
@@ -24,6 +25,7 @@ push-csharp-svc: build-csharp-svc
 .PHONY: run-go-svc
 run-go-svc:
 	docker compose -f $(GO_SOURCE)/docker-compose.yml up --build 
+	
 .PHONY: build-go-svc
 build-go-svc:
 	docker build -t ptoluganti/go-service -f $(GO_SOURCE)/Dockerfile $(GO_SOURCE)
