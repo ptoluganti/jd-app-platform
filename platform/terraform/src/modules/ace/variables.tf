@@ -43,7 +43,7 @@ variable "log_analytics_workspace_id" {
 variable "infrastructure_subnet_id" {
   type        = string
   description = "The Infrastructure Subnet ID"
-
+  default     = null
 }
 
 variable "workload_profile" {
@@ -53,13 +53,15 @@ variable "workload_profile" {
     maximum_count         = number
     minimum_count         = number
   }))
+  default = {
+  }
 }
 
 variable "certificates" {
   type = map(object({
-    friendly_name  = string
-    key_vault_id   = string
-    secret_name    = string
+    friendly_name = string
+    key_vault_id  = string
+    secret_name   = string
     # secret_version = string
   }))
 }
