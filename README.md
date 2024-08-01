@@ -31,25 +31,27 @@ print(result["access_token"])
 ```
 
 ``` powershell
-using Microsoft.Identity.Client;
+# Import the necessary module
+Import-Module Microsoft.Identity.Client
 
-var apiScopes = new[] { "api:///.default" };
-//var appScopes = new[] { "api:///App01Call" };
+# Define the parameters
+$apiScopes = @("api://<<>>/.default")
+$tenantId = ""
+$clientId = ""
+$clientSecret = ""
+$redirectUri = "http://localhost"
 
-var tenantId = "";
-var clientId = "";
-var clientSecret = "";
+# Create the confidential client application
+$app = [Microsoft.Identity.Client.ConfidentialClientApplicationBuilder]::Create($clientId)
+    .WithClientSecret($clientSecret)
+    .WithRedirectUri($redirectUri)
+    .WithTenantId($tenantId)
+    .Build()
 
-//var url = "htts://";
+# Acquire the token
+$result = $app.AcquireTokenForClient($apiScopes).ExecuteAsync().GetAwaiter().GetResult()
 
-string redirectUri = "http://localhost";
-var app = ConfidentialClientApplicationBuilder.Create(clientId)
-    .WithClientSecret(clientSecret)
-    .WithRedirectUri(redirectUri)
-    .WithTenantId(tenantId)
-    .Build();
+# Output the access token
+Write-Output $result.AccessToken
 
-
-var result = await app.AcquireTokenForClient(apiScopes).ExecuteAsync();
-Console.WriteLine(result.AccessToken);
 ```
