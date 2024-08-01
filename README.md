@@ -29,3 +29,27 @@ result = app.acquire_token_for_client(scopes=api_scopes)
 print(result["access_token"])
 
 ```
+
+``` powershell
+using Microsoft.Identity.Client;
+
+var apiScopes = new[] { "api:///.default" };
+//var appScopes = new[] { "api:///App01Call" };
+
+var tenantId = "";
+var clientId = "";
+var clientSecret = "";
+
+//var url = "htts://";
+
+string redirectUri = "http://localhost";
+var app = ConfidentialClientApplicationBuilder.Create(clientId)
+    .WithClientSecret(clientSecret)
+    .WithRedirectUri(redirectUri)
+    .WithTenantId(tenantId)
+    .Build();
+
+
+var result = await app.AcquireTokenForClient(apiScopes).ExecuteAsync();
+Console.WriteLine(result.AccessToken);
+```
